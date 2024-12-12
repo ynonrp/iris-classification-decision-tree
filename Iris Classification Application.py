@@ -4,6 +4,7 @@ import tkinter as tk
 import joblib
 import pandas as pd
 from PIL import Image, ImageTk
+import webbrowser
 
 def resource_path(relative_path):
     try:
@@ -18,7 +19,8 @@ def resource_path(relative_path):
 window = tk.Tk()
 window.title("Iris Classification")
 window.resizable(False, False)
-window.geometry("530x310")
+window.geometry("540x325")
+window.iconbitmap("img\Icon.ico")
 
 frameTitle = tk.Frame()
 frameTitle.grid(row=0, column=0, columnspan=2)
@@ -26,7 +28,7 @@ frameTitle.grid(row=0, column=0, columnspan=2)
 framePredict = tk.Frame()
 framePredict.grid(row=1, column=0)
 
-frameInformation = tk.LabelFrame(text="Information", height=264, width=300)
+frameInformation = tk.LabelFrame(text="Information", height=278, width=310)
 frameInformation.grid(row=1, column=1, sticky="nw")
 frameInformation.pack_propagate(False)
 
@@ -57,8 +59,9 @@ input_petal_width.grid(row=3, column=1)
 tk.Label(frameInput, text=" cm", width=5, anchor="w").grid(row=3, column=2)
 
 #Predict Model
-model_path = resource_path("model.pkl")
+model_path = resource_path("Model Trained\model.pkl")
 model = joblib.load(model_path)
+informationCSV = pd.read_csv("Information File\Information.csv")
 
 def predict_result():
     try:
@@ -79,6 +82,28 @@ def predict_result():
                                   f"\n"
                                   f"Predict result : Iris {predict[0]}")
         
+        global img
+        if(predict[0]=="Setosa"):
+            index = 0
+        elif(predict[0]=="Versicolor"):
+            index = 1
+        elif(predict[0]=="Virginica"):
+            index = 2
+        
+        imgOri = Image.open(informationCSV["Image"].loc[index])
+        imgResized = imgOri.resize((100, 100))
+        img = ImageTk.PhotoImage(imgResized)
+        imgInformation.config(image=img)
+        textInformation.config(text=informationCSV["Information"].loc[index])
+        moreInformation.config( text="More information:")
+        linkInformation.config(text=informationCSV["Link"].loc[index])
+                
+        def open_link(event):
+            link = informationCSV["Link"].loc[index]
+            webbrowser.open(link)
+
+        linkInformation.bind("<Button-1>", open_link)
+
     except ValueError:
         output_result.config(text="Error")
 
@@ -89,18 +114,16 @@ bt_submit.grid(row=4, column=0, columnspan=3, pady=10)
 frameResult = tk.LabelFrame(framePredict, text="Result")
 frameResult.pack()
 
-output_result = tk.Label(frameResult, width=27, height=6, justify="left", anchor="nw",)
+output_result = tk.Label(frameResult, width=27, height=7, justify="left", anchor="nw",)
 output_result.pack()
 
-information = "Iris setosa is a species of flowering plant in the genus Iris of the family Iridaceae, it belongs the subgenus Limniris and the series Tripetalae. It is a rhizomatous perennial from a wide range across the Arctic sea, including Alaska, Maine, Canada (including British Columbia, Newfoundland, Quebec and Yukon), Russia (including Siberia), northeastern Asia, China, Korea and southwards to Japan."
-
-imgOri = Image.open("Iris Setosa.jpg")
-imgResized = imgOri.resize((100, 100))
-img = ImageTk.PhotoImage(imgResized)
-
-imgInformation = tk.Label(frameInformation, image=img, anchor="nw")
+imgInformation = tk.Label(frameInformation)
 imgInformation.pack()
-textInformation = tk.Message(frameInformation, text=information, width=280)
+textInformation = tk.Message(frameInformation, width=300)
 textInformation.pack()
+moreInformation = tk.Label(frameInformation, width=300, anchor="sw", padx=2)
+moreInformation.pack()
+linkInformation = tk.Label(frameInformation, width=300, anchor="nw", fg="blue", cursor="hand2", padx=2)
+linkInformation.pack()
 
 window.mainloop()
