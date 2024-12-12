@@ -20,7 +20,7 @@ window = tk.Tk()
 window.title("Iris Classification")
 window.resizable(False, False)
 window.geometry("540x325")
-window.iconbitmap("img\Icon.ico")
+window.iconbitmap(resource_path("img/Icon.ico"))
 
 frameTitle = tk.Frame()
 frameTitle.grid(row=0, column=0, columnspan=2)
@@ -59,9 +59,9 @@ input_petal_width.grid(row=3, column=1)
 tk.Label(frameInput, text=" cm", width=5, anchor="w").grid(row=3, column=2)
 
 #Predict Model
-model_path = resource_path("Model Trained\model.pkl")
-model = joblib.load(model_path)
-informationCSV = pd.read_csv("Information File\Information.csv")
+# model_path = resource_path("Model Trained/model.pkl")
+model = joblib.load(resource_path("Model Trained/model.pkl"))
+informationCSV = pd.read_csv(resource_path("Information Data/Information.csv"))
 
 def predict_result():
     try:
@@ -90,7 +90,9 @@ def predict_result():
         elif(predict[0]=="Virginica"):
             index = 2
         
-        imgOri = Image.open(informationCSV["Image"].loc[index])
+        imgOri_path = resource_path(informationCSV["Image"].loc[index])
+        imgOri = Image.open(imgOri_path)
+        print(informationCSV["Image"].loc[index])
         imgResized = imgOri.resize((100, 100))
         img = ImageTk.PhotoImage(imgResized)
         imgInformation.config(image=img)
